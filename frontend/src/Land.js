@@ -5,11 +5,14 @@ function Land() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
   const [result, setResult] = useState('');
+  const [confidence, setConfidence] = useState(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file);
     setPreviewURL(URL.createObjectURL(file)); // Generate preview
+    setResult('');      // Reset previous result on new file select
+    setConfidence(null);
   };
 
   const handleUpload = async () => {
@@ -21,9 +24,11 @@ function Land() {
     try {
       const response = await axios.post('http://localhost:5000/upload', formData);
       setResult(response.data.medicine);
+      setConfidence(response.data.confidence);
     } catch (error) {
       console.error('Upload failed:', error);
       setResult('Error detecting medicine.');
+      setConfidence(null);
     }
   };
 
@@ -43,7 +48,11 @@ function Land() {
       <br />
       <button onClick={handleUpload}>Upload Prescription</button>
       <br /><br />
-      {result && <h2>Detected Medicine: {result}</h2>}
+      {result && (
+        <h2>
+          Detected Medicine: {result} {confidence !== null && ` (Confidence: ${confidence}%)`}
+        </h2>
+      )}
     </div>
   );
 }
